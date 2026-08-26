@@ -305,3 +305,62 @@ footer {
  *  transition: none !important;
   *
 }
+
+.quote-section {
+  grid-column: 1 / -1;
+}
+
+.quote-introduction {
+  max-width: 720px;
+  margin-bottom: 2rem;
+}
+
+.quote-form {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.form-field-wide {
+  grid-column: 1 / -1;
+}
+
+.form-field-wide {
+  grid-column: 1 / -1;
+  width: 100%;
+}
+
+.form-field-wide label {
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.form-field-wide textarea {
+  display: block;
+  width: 100%;
+  min-height: 130px;
+  padding: 0.9rem 1rem;
+  border: 1px solid #b8c2cc;
+  border-radius: 9px;
+  color: var(--text);
+  background-color: var(--white);
+  font: inherit;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.form-field-wide textarea:focus {
+  outline: 3px solid rgba(255, 196, 0, 0.3);
+  border-color: var(--yellow-dark);
+}
