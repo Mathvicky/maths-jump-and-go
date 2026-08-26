@@ -56,9 +56,9 @@
       <p class="section-label">Clear pricing</p>
       <h2>Call-out Prices</h2>
       <ul>
-        <li>0 to 5 driving miles: £55</li>
-        <li>5 to 10 driving miles: £60</li>
-        <li>10 to 15 driving miles: £65</li>
+        <li>0 to 5 driving miles: £45</li>
+        <li>5 to 10 driving miles: £55</li>
+        <li>10 to 15 driving miles: £60</li>
       </ul>
       <p>
         Final price is confirmed before dispatch. Additional charges may apply
@@ -75,14 +75,115 @@
       </p>
     </section>
 
-    <section class="content-card" id="quote">
-      <p class="section-label">Need assistance?</p>
-      <h2>Request a Quote</h2>
-      <p>
-        The secure quote and booking form will be added during the next
-        application-development stage.
-      </p>
-    </section>
+    <section class="content-card quote-section" id="quote">
+  <div class="quote-introduction">
+    <p class="section-label">Need assistance?</p>
+    <h2>Request a Quote</h2>
+    <p>
+      Enter the call-out details below. The estimated price is based on
+      driving distance and call-out time. The final price will be confirmed
+      before dispatch.
+    </p>
+  </div>
+
+  <form class="quote-form" id="quote-form" novalidate>
+    <div class="form-grid">
+      <div class="form-field">
+        <label for="customer-name">Full name</label>
+        <input type="text" id="customer-name"
+          name="customerName" autocomplete="name" required>
+        <small class="field-error"
+          id="customer-name-error"></small>
+      </div>
+
+      <div class="form-field">
+        <label for="phone-number">Phone number</label>
+        <input type="tel" id="phone-number"
+          name="phoneNumber" autocomplete="tel" required>
+        <small class="field-error"
+          id="phone-number-error"></small>
+      </div>
+
+      <div class="form-field">
+        <label for="postcode">Call-out postcode</label>
+        <input type="text" id="postcode"
+          name="postcode" autocomplete="postal-code" required>
+        <small class="field-error"
+          id="postcode-error"></small>
+      </div>
+
+      
+
+      
+      <div class="form-field">
+        <label for="vehicle-type">Vehicle type</label>
+        <select id="vehicle-type" name="vehicleType" required>
+          <option value="">Select vehicle type</option>
+          <option value="car">Car</option>
+          <option value="van">Van</option>
+          <option value="large">Large vehicle</option>
+        </select>
+        <small class="field-error" id="vehicle-type-error"></small>
+      </div>
+
+      <div class="form-field">
+        <label for="registration">Vehicle registration number</label>
+        <input type="text" id="registration"
+          name="registration" autocomplete="off" required>
+      </div>
+
+      
+
+      <div class="form-field">
+        <label for="callout-time">Call-out time</label>
+        <select id="callout-time" name="calloutTime" required>
+          <option value="">Select a time</option>
+          <option value="0">Standard hours</option>
+          <option value="10">Evening or weekend, add £10</option>
+        </select>
+        <small class="field-error"
+          id="callout-time-error"></small>
+      </div>
+
+      <div class="form-field">
+        <label for="problem">Starting problem</label>
+        <select id="problem" name="problem">
+          <option value="">Select an option, optional</option>
+          <option value="clicking">Clicking sound</option>
+          <option value="dim-lights">Dim dashboard lights</option>
+          <option value="no-response">No response</option>
+          <option value="slow-start">Engine turns slowly</option>
+          <option value="other">Other or not sure</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="price-estimate" aria-live="polite">
+      <span>Estimated call-out price</span>
+      <strong id="estimated-price">
+        Enter postcode and vehicle type
+      </strong>
+    </div>
+
+    <div class="privacy-field">
+      <input type="checkbox" id="privacy-acknowledgement"
+        name="privacyAcknowledgement" required>
+      <label for="privacy-acknowledgement">
+        I understand that this demonstration form is not sending data yet.
+      </label>
+    </div>
+
+    <small class="field-error"
+      id="privacy-acknowledgement-error"></small>
+
+    <button class="button button-primary" type="submit">
+      Check quote details
+    </button>
+
+    <p class="form-message" id="form-message"
+      aria-live="polite"></p>
+  </form>
+</section>
   </main>
 
   <footer>
