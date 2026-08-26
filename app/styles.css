@@ -277,6 +277,23 @@ footer {
   }
 }
 
+.hero {
+  position: relative;
+  isolation: isolate;
+  background-color: var(--navy);
+  background-image:
+    linear-gradient(
+      90deg,
+      rgba(8, 29, 49, 0.98) 0%,
+      rgba(8, 29, 49, 0.86) 48%,
+      rgba(8, 29, 49, 0.28) 100%
+    ),
+    url("assets/images/hero-jump-start.jpg");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -284,7 +301,7 @@ footer {
 
   *,
   *::before,
-  *::after {*    animation: none !important;
-  * transition: none !important;
-  }
-*
+  *::after {\*    animation: none !important;
+ *  transition: none !important;
+  *
+}
