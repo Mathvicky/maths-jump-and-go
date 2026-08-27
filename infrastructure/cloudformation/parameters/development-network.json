@@ -1,0 +1,30 @@
+[
+  {
+    "ParameterKey": "ProjectName",
+    "ParameterValue": "maths-jump-and-go"
+  },
+  {
+    "ParameterKey": "EnvironmentName",
+    "ParameterValue": "development"
+  },
+  {
+    "ParameterKey": "VpcCidr",
+    "ParameterValue": "10.20.0.0/16"
+  },
+  {
+    "ParameterKey": "PublicSubnetOneCidr",
+    "ParameterValue": "10.20.0.0/24"
+  },
+  {
+    "ParameterKey": "PublicSubnetTwoCidr",
+    "ParameterValue": "10.20.1.0/24"
+  },
+  {
+    "ParameterKey": "PrivateSubnetOneCidr",
+    "ParameterValue": "10.20.10.0/24"
+  },
+  {
+    "ParameterKey": "PrivateSubnetTwoCidr",
+    "ParameterValue": "10.20.11.0/24"
+  }
+]
