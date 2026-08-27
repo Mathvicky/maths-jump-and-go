@@ -1,0 +1,12 @@
+{
+    "Status": "CREATE_COMPLETE",
+    "Reason": null,
+    "Changes": [
+        {
+            "Action": "Add",
+            "LogicalId": "ECSExecutionRole",
+            "Type": "AWS::IAM::Role",
+            "Replacement": null
+        }
+    ]
+}

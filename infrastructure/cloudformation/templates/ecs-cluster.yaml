@@ -1,0 +1,29 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: ECS Cluster for Math's Jump & Go
+
+Resources:
+  ECSCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: maths-jump-and-go-development
+
+      ClusterSettings:
+        - Name: containerInsights
+          Value: enabled
+
+  ECSLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /ecs/maths-jump-and-go-development
+      RetentionInDays: 30
+
+Outputs:
+  ECSClusterName:
+    Value: !Ref ECSCluster
+
+  ECSClusterArn:
+    Value: !GetAtt ECSCluster.Arn
+
+  ECSLogGroup:
+    Value: !Ref ECSLogGroup

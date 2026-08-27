@@ -45,6 +45,7 @@ aws cloudformation create-change-set \
   --template-body "file://${TEMPLATE_FILE}" \
   --parameters "file://${PARAMETERS_FILE}" \
   --region "${AWS_REGION}" \
+  --capabilities CAPABILITY_NAMED_IAM \
   --description "Preview generated from the maths-jump-and-go repository"
 
 echo "Waiting for CloudFormation to prepare the preview..."
