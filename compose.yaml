@@ -1,0 +1,14 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: maths-jump-and-go-backend:dev
+    container_name: maths-jump-and-go-backend
+    environment:
+      SERVICE_BASE_POSTCODE: ${SERVICE_BASE_POSTCODE:-HP00 0AA}
+      AWS_REGION: ${AWS_REGION:-eu-west-2}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+    ports:
+      - "127.0.0.1:8002:8001"
+    restart: unless-stopped
