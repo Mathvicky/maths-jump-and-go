@@ -1,0 +1,122 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: >
+  Private Amazon ECR repository for Math's Jump & Go backend
+  container images.
+
+Parameters:
+  ProjectName:
+    Type: String
+    Default: maths-jump-and-go
+    AllowedPattern: "^[a-z0-9-]+$"
+    Description: Lowercase project identifier.
+
+  EnvironmentName:
+    Type: String
+    Default: development
+    AllowedValues:
+      - development
+      - staging
+      - production
+    Description: Deployment environment name.
+
+  ImagesToRetain:
+    Type: Number
+    Default: 20
+    MinValue: 5
+    MaxValue: 100
+    Description: Maximum number of tagged application images to retain.
+
+Resources:
+  BackendRepository:
+    Type: AWS::ECR::Repository
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      RepositoryName: !Sub "${ProjectName}/${EnvironmentName}/backend"
+      ImageTagMutability: IMMUTABLE
+      EmptyOnDelete: false
+
+      EncryptionConfiguration:
+        EncryptionType: AES256
+
+      LifecyclePolicy:
+        LifecyclePolicyText: !Sub |
+          {
+            "rules": [
+              {
+                "rulePriority": 1,
+                "description": "Remove untagged images after seven days",
+                "selection": {
+                  "tagStatus": "untagged",
+                  "countType": "sinceImagePushed",
+                  "countUnit": "days",
+                  "countNumber": 7
+                },
+                "action": {
+                  "type": "expire"
+                }
+              },
+              {
+                "rulePriority": 2,
+                "description": "Retain the most recent tagged application images",
+                "selection": {
+                  "tagStatus": "tagged",
+                  "tagPrefixList": [
+                    "sha-",
+                    "release-"
+                  ],
+                  "countType": "imageCountMoreThan",
+                  "countNumber": ${ImagesToRetain}
+                },
+                "action": {
+                  "type": "expire"
+                }
+              }
+            ]
+          }
+
+      Tags:
+        - Key: Name
+          Value: !Sub "${ProjectName}-${EnvironmentName}-backend-ecr"
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref EnvironmentName
+        - Key: ManagedBy
+          Value: CloudFormation
+
+RegistryScanningConfiguration:
+2
+Type: AWS::ECR::RegistryScanningConfiguration
+3
+Properties:
+4
+ScanType: BASIC
+5
+Rules:
+6
+- ScanFrequency: SCAN_ON_PUSH
+7
+RepositoryFilters:
+8
+- Filter: !Sub "${ProjectName}/${EnvironmentName}/*"
+9
+FilterType: WILDCARD
+
+Outputs:
+  BackendRepositoryName:
+    Description: Name of the backend ECR repository.
+    Value: !Ref BackendRepository
+    Export:
+      Name: !Sub "${ProjectName}-${EnvironmentName}-backend-ecr-name"
+
+  BackendRepositoryArn:
+    Description: ARN of the backend ECR repository.
+    Value: !GetAtt BackendRepository.Arn
+
+  BackendRepositoryUri:
+    Description: URI used to tag, push and pull backend images.
+    Value: !GetAtt BackendRepository.RepositoryUri
+    Export:
+      Name: !Sub "${ProjectName}-${EnvironmentName}-backend-ecr-uri"

@@ -1,0 +1,14 @@
+[
+  {
+    "ParameterKey": "ProjectName",
+    "ParameterValue": "maths-jump-and-go"
+  },
+  {
+    "ParameterKey": "EnvironmentName",
+    "ParameterValue": "development"
+  },
+  {
+    "ParameterKey": "ImagesToRetain",
+    "ParameterValue": "20"
+  }
+]
