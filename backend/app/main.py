@@ -1,6 +1,7 @@
 import httpx
 from fastapi import FastAPI, HTTPException
-
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from app.dependencies import (
     PostcodeClientDependency,
     RoutesClientDependency,
@@ -19,14 +20,11 @@ app = FastAPI(
     title="Math's Jump & Go API",
     version="0.3.0",
 )
-
+app.mount("/static", StaticFiles(directory="app"), name="static")
 
 @app.get("/")
-def read_root() -> dict[str, str]:
-    return {
-        "service": "Math's Jump & Go API",
-        "status": "running",
-    }
+async def serve_frontend():
+    return FileResponse("app/index.html")
 
 
 @app.get("/health")
