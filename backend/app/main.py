@@ -1,6 +1,14 @@
-from fastapi import FastAPI
+import httpx
+from fastapi import FastAPI, HTTPException
 
-from app.pricing import calculate_car_price
+from app.dependencies import (
+    PostcodeClientDependency,
+    RoutesClientDependency,
+    SettingsDependency,
+)
+from app.postcodes import PostcodeNotFoundError
+from app.quote_service import estimate_car_quote_from_postcode
+from app.routing import RouteCalculationError
 from app.schemas import (
     QuoteEstimateRequest,
     QuoteEstimateResponse,
@@ -9,7 +17,7 @@ from app.schemas import (
 
 app = FastAPI(
     title="Math's Jump & Go API",
-    version="0.2.0",
+    version="0.3.0",
 )
 
 
@@ -30,8 +38,11 @@ def health_check() -> dict[str, str]:
     "/api/quotes/estimate",
     response_model=QuoteEstimateResponse,
 )
-def estimate_quote(
+async def estimate_quote(
     request: QuoteEstimateRequest,
+    settings: SettingsDependency,
+    postcode_client: PostcodeClientDependency,
+    routes_client: RoutesClientDependency,
 ) -> QuoteEstimateResponse:
     if request.vehicle_type == "van":
         return QuoteEstimateResponse(
@@ -47,10 +58,26 @@ def estimate_quote(
             message="Large vehicles require a manual quote.",
         )
 
-    price = calculate_car_price(
-        driving_miles=request.driving_miles,
-        evening_or_weekend=request.evening_or_weekend,
-    )
+    try:
+        price, _driving_miles = (
+            await estimate_car_quote_from_postcode(
+                customer_postcode=request.postcode,
+                evening_or_weekend=request.evening_or_weekend,
+                settings=settings,
+                postcode_client=postcode_client,
+                routes_client=routes_client,
+            )
+        )
+    except PostcodeNotFoundError as error:
+        raise HTTPException(
+            status_code=400,
+            detail=str(error),
+        ) from error
+    except (RouteCalculationError, httpx.HTTPError) as error:
+        raise HTTPException(
+            status_code=503,
+            detail="The quote service is temporarily unavailable.",
+        ) from error
 
     if price is None:
         return QuoteEstimateResponse(

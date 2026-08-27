@@ -5,7 +5,11 @@ from pydantic import BaseModel, Field
 
 class QuoteEstimateRequest(BaseModel):
     vehicle_type: Literal["car", "van", "large"]
-    driving_miles: float = Field(ge=0)
+    postcode: str = Field(
+        min_length=5,
+        max_length=8,
+        examples=["HP11 2AA"],
+    )
     evening_or_weekend: bool = False
 
 
