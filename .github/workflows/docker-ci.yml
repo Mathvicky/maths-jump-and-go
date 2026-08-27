@@ -1,0 +1,37 @@
+name: Docker CI
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - "feature/**"
+  pull_request:
+    branches:
+ **   - main
+      - develop
+
+permis**ons:
+  contents: read
+
+jobs:
+  bu**d-backend-image:
+    name: Build **ckend container
+    runs-on: ubun**-latest
+
+    steps:
+      - name:**heck out repository
+        uses:**ctions/checkout@v7
+
+      - name:**et up Docker Buildx
+        uses:**ocker/setup-buildx-action@v4
+
+   ** - name: Build backend image
+    **  uses**docker**uild-push-action@v7
+**      with:
+         **ontext: ./backend
+          file:**/backend/Dockerfile
+          pus** false
+          tags: maths-jump**nd-go-backend:ci
+          cache-**om: type=gha
+          cache-to: **pe=gha,mode=max
