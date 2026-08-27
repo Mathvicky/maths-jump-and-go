@@ -9,37 +9,42 @@ on:
     paths:
       - "infrastructure/cloudformation/**"
       - ".github/workflows/cloudformation-ci.yml"
+
   pull_request:
     branches:
       - main
       - develop
     paths:
       - "infrastructure/cloudformation/**"
-      - ".github/workflows/clou**ormation-ci.yml"
-  workflow_dispa**h:
+      - ".github/workflows/cloudformation-ci.yml"
+
+  workflow_dispatch:
 
 permissions:
-  contents: read**jobs:
+  contents: read
+
+jobs:
   validate-cloudformation:
-**  name: Validate CloudFormation
- ** runs-on: ubuntu-latest
+    name: Validate CloudFormation
+    runs-on: ubuntu-latest
 
-    step**
-      - name: Check out reposito**
-        uses: actions/checkout@v**
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
       - name: Set up Python
-    **  uses: actions/setup-python@v7
- **     with:
-          python-versi**: "3.12"
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
           cache: pip
-   **     cache-dependency-path: infra**ructure/cloudformation/requiremen**.txt
+          cache-dependency-path: infrastructure/cloudformation/requirements.txt
 
-      - name: Install infra**ructure validation tools
-        **n: |
-          python -m pip inst**l --upgrade pip
-          python ** pip install -r infrastructure/cl**dformation/requirements.txt
+      - name: Install infrastructure validation tools
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r infrastructure/cloudformation/requirements.txt
 
-    **- name: Validate CloudFormation t**plates
+      - name: Validate CloudFormation templates
         env:
-          AWS**EGION: eu-west-2
-        run: ./i**rastructure/cloudformation/script**validate.sh
+          AWS_REGION: eu-west-2
+        run: ./infrastructure/cloudformation/scripts/validate.sh
