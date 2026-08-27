@@ -23,9 +23,14 @@ app = FastAPI(
 app.mount("/static", StaticFiles(directory="app"), name="static")
 
 @app.get("/")
+def read_root() -> dict[str, str]:
+    return {
+        "service": "Math's Jump & Go API",
+        "status": "running",
+    }
+@app.get("/website")
 async def serve_frontend():
     return FileResponse("app/index.html")
-
 
 @app.get("/health")
 def health_check() -> dict[str, str]:
