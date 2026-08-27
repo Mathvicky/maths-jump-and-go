@@ -2,35 +2,23 @@ name: Docker CI
 
 on:
   push:
+  pull_request:
     branches:
       - main
       - develop
-      - "feature/**"
-  pull_request:
-    bra**hes:
-      - main
-      - develop** workflow_dispatch:
+  workflow_dispatch:
 
-permissions:** contents: read
+permissions:
+  contents: read
 
 jobs:
-  build-ba**end-image:
-    name: Build backen**container
-    runs-on: ubuntu-lat**t
+  build-backend-image:
+    name: Build backend container
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Check**ut repository
-        uses: actio**/checkout@v7
+      - name: Check out repository
+        uses: actions/checkout@v7
 
-      - name: Set u**Docker Buildx
-        uses: docke**setup-buildx-action@v4
-
-      - n**e: Build backend image
-        us**: docker/build-push-action@v7
-   **   with:
-          context: ./bac**nd
-          file: ./backend/Dock**file
-          push: false
-      **  tags: maths-jump-and-go-backend**i
-          cache-from: type=gha
-**        cache-to: type=gha,mode=m**
+      - name: Build backend image
+        run: docker build --tag maths-jump-and-go-backend:ci ./backend
