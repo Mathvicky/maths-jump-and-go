@@ -7,31 +7,30 @@ on:
       - develop
       - "feature/**"
   pull_request:
-    branches:
- **   - main
-      - develop
+    bra**hes:
+      - main
+      - develop** workflow_dispatch:
 
-permis**ons:
-  contents: read
+permissions:** contents: read
 
 jobs:
-  bu**d-backend-image:
-    name: Build **ckend container
-    runs-on: ubun**-latest
+  build-ba**end-image:
+    name: Build backen**container
+    runs-on: ubuntu-lat**t
 
     steps:
-      - name:**heck out repository
-        uses:**ctions/checkout@v7
+      - name: Check**ut repository
+        uses: actio**/checkout@v7
 
-      - name:**et up Docker Buildx
-        uses:**ocker/setup-buildx-action@v4
+      - name: Set u**Docker Buildx
+        uses: docke**setup-buildx-action@v4
 
-   ** - name: Build backend image
-    **  uses**docker**uild-push-action@v7
-**      with:
-         **ontext: ./backend
-          file:**/backend/Dockerfile
-          pus** false
-          tags: maths-jump**nd-go-backend:ci
-          cache-**om: type=gha
-          cache-to: **pe=gha,mode=max
+      - n**e: Build backend image
+        us**: docker/build-push-action@v7
+   **   with:
+          context: ./bac**nd
+          file: ./backend/Dock**file
+          push: false
+      **  tags: maths-jump-and-go-backend**i
+          cache-from: type=gha
+**        cache-to: type=gha,mode=m**
