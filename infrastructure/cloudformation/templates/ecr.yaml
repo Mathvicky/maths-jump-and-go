@@ -59,7 +59,7 @@ Resources:
               },
               {
                 "rulePriority": 2,
-                "description": "Retain the most recent tagged application images",
+                "description": "Retain recent tagged application images",
                 "selection": {
                   "tagStatus": "tagged",
                   "tagPrefixList": [
@@ -86,23 +86,15 @@ Resources:
         - Key: ManagedBy
           Value: CloudFormation
 
-RegistryScanningConfiguration:
-2
-Type: AWS::ECR::RegistryScanningConfiguration
-3
-Properties:
-4
-ScanType: BASIC
-5
-Rules:
-6
-- ScanFrequency: SCAN_ON_PUSH
-7
-RepositoryFilters:
-8
-- Filter: !Sub "${ProjectName}/${EnvironmentName}/*"
-9
-FilterType: WILDCARD
+  RegistryScanningConfiguration:
+    Type: AWS::ECR::RegistryScanningConfiguration
+    Properties:
+      ScanType: BASIC
+      Rules:
+        - ScanFrequency: SCAN_ON_PUSH
+          RepositoryFilters:
+            - Filter: !Sub "${ProjectName}/${EnvironmentName}/*"
+              FilterType: WILDCARD
 
 Outputs:
   BackendRepositoryName:
