@@ -1,0 +1,42 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: ECS Task Definition
+
+Resources:
+
+  BackendTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: maths-jump-and-go-backend
+
+      RequiresCompatibilities:
+        - FARGATE
+
+      NetworkMode: awsvpc
+
+      Cpu: "256"
+      Memory: "512"
+
+      ExecutionRoleArn: "arn:aws:iam::653058737468:role/maths-jump-and-go-ecs-execution-role"
+
+      ContainerDefinitions:
+        - Name: backend
+
+          Image: 653058737468.dkr.ecr.eu-west-2.amazonaws.com/maths-jump-and-go/development/backend:dev
+
+          Essential: true
+
+          PortMappings:
+            - ContainerPort: 8001
+
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: /ecs/maths-jump-and-go-development
+              awslogs-region: eu-west-2
+              awslogs-stream-prefix: backend
+
+Outputs:
+  TaskDefinitionArn:
+    Value: !Ref BackendTaskDefinition
+

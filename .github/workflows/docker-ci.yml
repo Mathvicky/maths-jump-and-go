@@ -1,0 +1,24 @@
+name: Docker CI
+
+on:
+  push:
+  pull_request:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-backend-image:
+    name: Build backend container
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Build backend image
+        run: docker build --tag maths-jump-and-go-backend:ci ./backend

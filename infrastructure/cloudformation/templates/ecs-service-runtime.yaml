@@ -1,0 +1,32 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: ECS Service Runtime
+
+Resources:
+  BackendService:
+    Type: AWS::ECS::Service
+    Properties:
+      Cluster: maths-jump-and-go-development
+
+      ServiceName: maths-jump-and-go-backend
+
+      LaunchType: FARGATE
+
+      DesiredCount: 1
+
+      TaskDefinition: maths-jump-and-go-backend
+
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+
+          Subnets:
+            - subnet-0093b44243a3aecf7
+            - subnet-01eaca0890b6966d3
+
+          SecurityGroups:
+            - sg-0c215a76a1e0abfb3
+
+Outputs:
+  ServiceName:
+    Value: !Ref BackendService
