@@ -141,7 +141,7 @@
             </div>
           </div>
           <button class="button button-primary estimate-submit" id="estimate-button" type="submit">GET INSTANT ESTIMATE</button>
-          <p class="data-note">By requesting an estimate, the three details above plus the price, time and an estimate ID are saved for 30 days. <a href="#privacy">How we use your data</a>.</p>
+          <p class="data-note" id="estimate-data-note">Your three details are used to calculate the estimate. <a href="#privacy">How we use your data</a>.</p>
           <p class="form-message" id="form-message" aria-live="polite"></p>
         </fieldset>
       </form>
@@ -166,7 +166,7 @@
     </section>
     <section class="content-card" id="privacy" data-reveal>
       <h2>Your quote request</h2>
-      <p>When you select Get Instant Estimate, we use your postcode, vehicle type and call-out time to calculate the price. We save only those details, the estimate, timestamp and a unique estimate ID in a private Google Sheet for 30 days, and email the same estimate to the business.</p>
+      <p id="quote-data-use">When you select Get Instant Estimate, we use your postcode, vehicle type and call-out time to calculate the price. When the business notification service is connected, only those details, the estimate, timestamp and a unique estimate ID are saved for 30 days and emailed to the business.</p>
       <p>Your postcode is sent to Postcodes.io and route coordinates are processed by Amazon Location or the OpenStreetMap routing service. We do not ask for or store your name, phone number, registration, full address or payment details.</p>
       <p>Please do not include payment information or other sensitive details.</p>
     </section>
@@ -177,6 +177,6 @@
   </footer>
 
   <script src="config.js?v=20260927-3"></script>
-  <script src="script.js?v=20260927-6"></script>
+  <script src="script.js?v=20260927-7"></script>
 </body>
 </html>

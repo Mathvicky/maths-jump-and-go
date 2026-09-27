@@ -8,11 +8,12 @@ function setup(api = "https://api.example.test") {
     "estimate-form", "estimate-fields", "estimate-button", "estimate-modal",
     "estimated-price", "estimate-message", "estimate-location", "estimate-distance",
     "estimate-title", "estimate-rate-notice", "estimate-reference", "estimate-close", "form-message", "call-now", "whatsapp-now",
-    "contact-setup-note", "postcode", "vehicle-type", "callout-time",
+    "contact-setup-note", "estimate-data-note", "quote-data-use", "postcode", "vehicle-type", "callout-time",
   ];
   const nodes = Object.fromEntries(ids.map((id) => [id, {
     value: "", checked: true, hidden: true, disabled: false, open: false, textContent: "",
     handlers: {},
+    firstChild: { textContent: "" },
     addEventListener(name, fn) { this.handlers[name] = fn; },
     reportValidity() { return true; },
     scrollIntoView() {}, focus() {}, reset() {},
@@ -37,8 +38,19 @@ function setup(api = "https://api.example.test") {
     },
     URL, Intl, AbortController, setTimeout, clearTimeout, Error, TypeError,
     crypto: { randomUUID: () => "82c77659-19e0-4b81-81ef-eed4a84c61b1" },
-    fetch: async (url, options) => {
-      calls.push({ url, body: JSON.parse(options.body) });
+    fetch: async (url, options = {}) => {
+      calls.push({ url, body: options.body ? JSON.parse(options.body) : null });
+      if (url.startsWith("https://api.postcodes.io/")) return {
+        ok: true,
+        json: async () => ({ result: {
+          postcode: "HP11 2AA", latitude: 51.6, longitude: -0.7,
+          parish: "Chepping Wycombe", admin_district: "Buckinghamshire", region: "South East",
+        } }),
+      };
+      if (url.startsWith("https://router.project-osrm.org/")) return {
+        ok: true,
+        json: async () => ({ code: "Ok", routes: [{ distance: 10300 }] }),
+      };
       return { ok: true, json: async () => estimateResponse };
     },
   };
@@ -46,12 +58,17 @@ function setup(api = "https://api.example.test") {
   return { nodes, calls, respond: (value) => { estimateResponse = value; } };
 }
 
-test("unconfigured site disables estimate", async () => {
+test("unconfigured site calculates an estimate in the browser", async () => {
   const { nodes, calls } = setup("");
-  assert.equal(nodes["estimate-fields"].disabled, true);
+  nodes.postcode.value = "HP11 2AA";
+  nodes["vehicle-type"].value = "car";
+  nodes["callout-time"].value = "12:00";
+  assert.equal(nodes["estimate-fields"].disabled, false);
   await nodes["estimate-form"].handlers.submit({ preventDefault() {} });
-  assert.equal(calls.length, 0);
-  assert.match(nodes["form-message"].textContent, /not available/);
+  assert.equal(calls.length, 2);
+  assert.match(nodes["estimated-price"].textContent, /£55/);
+  assert.equal(nodes["estimate-modal"].open, true);
+  assert.match(nodes["estimate-data-note"].firstChild.textContent, /not saved/);
 });
 
 test("Get Instant Estimate sends only the four calculation inputs", async () => {

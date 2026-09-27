@@ -17,6 +17,8 @@ const formMessage = document.querySelector("#form-message");
 const callButton = document.querySelector("#call-now");
 const whatsappButton = document.querySelector("#whatsapp-now");
 const get = (id) => document.getElementById(id);
+const fallbackOrigin = Object.freeze({ latitude: 51.636098, longitude: -0.778677 });
+const metresPerMile = 1609.344;
 
 const revealItems = document.querySelectorAll
   ? Array.from(document.querySelectorAll("[data-reveal]"))
@@ -61,8 +63,11 @@ if (whatsapp) {
 }
 get("contact-setup-note").hidden = Boolean(phone || whatsapp);
 
-estimateFields.disabled = !apiBase;
-if (!apiBase) formMessage.textContent = "Online estimates are not available yet. Please call or WhatsApp us.";
+estimateFields.disabled = false;
+if (!apiBase) {
+  get("estimate-data-note").firstChild.textContent = "Your details are processed only to calculate this estimate and are not saved by the website. ";
+  get("quote-data-use").textContent = "When you select Get Instant Estimate, your postcode, vehicle type and call-out time are processed only to calculate and display the price. Until the business notification service is connected, the website does not save or email these details.";
+}
 
 let estimateId = crypto.randomUUID();
 let busy = false;
@@ -77,6 +82,7 @@ function quoteDetails() {
 }
 
 async function post(path, payload) {
+  if (!apiBase) return estimateInBrowser(payload);
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 15000);
   try {
@@ -101,6 +107,96 @@ async function post(path, payload) {
   }
 }
 
+function isNightTime(calloutTime) {
+  const [hour, minute] = calloutTime.split(":").map(Number);
+  const time = hour * 60 + minute;
+  return time >= 22 * 60 || time < 7 * 60;
+}
+
+function calculateBrowserPrice(drivingMiles, nightRate) {
+  let price;
+  if (drivingMiles <= 5) price = 45;
+  else if (drivingMiles <= 10) price = 55;
+  else if (drivingMiles <= 15) price = 60;
+  else price = Math.ceil(drivingMiles / 15) * 60;
+  return nightRate ? price * 2 : price;
+}
+
+async function getJson(url) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000);
+  try {
+    const response = await fetch(url, { signal: controller.signal });
+    if (!response.ok) throw new Error("The route service is temporarily unavailable.");
+    return await response.json();
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function estimateInBrowser(payload) {
+  const postcodeData = await getJson(
+    `https://api.postcodes.io/postcodes/${encodeURIComponent(payload.postcode)}`,
+  );
+  if (!postcodeData.result) throw new Error("Postcode could not be found.");
+
+  const destination = postcodeData.result;
+  const coordinates = [
+    `${fallbackOrigin.longitude},${fallbackOrigin.latitude}`,
+    `${destination.longitude},${destination.latitude}`,
+  ].join(";");
+  const routeData = await getJson(
+    `https://router.project-osrm.org/route/v1/driving/${coordinates}?overview=false&alternatives=false&steps=false`,
+  );
+  if (routeData.code !== "Ok" || !routeData.routes?.[0]?.distance) {
+    throw new Error("A driving route could not be calculated for this postcode.");
+  }
+
+  const drivingMiles = routeData.routes[0].distance / metresPerMile;
+  const nightRate = isNightTime(payload.callout_time);
+  const outOfArea = drivingMiles > 15;
+  const placeParts = [destination.parish, destination.admin_district, destination.region]
+    .filter((value, index, values) => value
+      && !value.toLowerCase().includes("unparished")
+      && values.indexOf(value) === index);
+
+  let pricingStatus = "estimated";
+  let estimatedPrice = calculateBrowserPrice(drivingMiles, nightRate);
+  let estimateLabel = outOfArea ? "Out-of-area estimate" : "Your estimate is ready";
+  let message = "Estimated call-out price. Final price is confirmed before dispatch.";
+  if (payload.vehicle_type === "van") {
+    pricingStatus = "confirmation_required";
+    estimatedPrice = null;
+    estimateLabel = "Your estimate requires confirmation";
+    message = "Van price requires confirmation. Call or WhatsApp us now.";
+  } else if (payload.vehicle_type === "large") {
+    pricingStatus = "manual_quote";
+    estimatedPrice = null;
+    estimateLabel = "Manual quote required";
+    message = "Large vehicles require a manual quote. Call or WhatsApp us now.";
+  }
+
+  let rateNotice = null;
+  if (pricingStatus === "estimated") {
+    if (nightRate && outOfArea) rateNotice = "Night/out-of-area rate applies.";
+    else if (nightRate) rateNotice = "Night call-out rate applies.";
+    else if (outOfArea) rateNotice = "Out-of-area rate applies.";
+  }
+
+  return {
+    pricing_status: pricingStatus,
+    estimated_price: estimatedPrice,
+    currency: "GBP",
+    message,
+    estimate_label: estimateLabel,
+    rate_notice: rateNotice,
+    estimate_id: payload.estimate_id,
+    postcode: destination.postcode,
+    location: placeParts.join(", ") || destination.postcode,
+    driving_miles: drivingMiles,
+  };
+}
+
 for (const id of ["postcode", "vehicle-type", "callout-time"]) {
   get(id).addEventListener("input", () => {
     estimateId = crypto.randomUUID();
@@ -116,7 +212,7 @@ estimateModal.addEventListener("click", (event) => {
 
 estimateForm.addEventListener("submit", async (event) => {
   event.preventDefault();
-  if (!apiBase || busy || !estimateForm.reportValidity()) return;
+  if (busy || !estimateForm.reportValidity()) return;
   busy = true;
   estimateButton.disabled = true;
   estimateButton.textContent = "Getting estimate…";
