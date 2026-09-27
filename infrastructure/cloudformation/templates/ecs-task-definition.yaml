@@ -2,6 +2,38 @@ AWSTemplateFormatVersion: "2010-09-09"
 
 Description: ECS Task Definition
 
+Parameters:
+  BackendImageUri:
+    Type: String
+    Description: ECR image URI with a unique immutable release tag.
+  ApplicationTaskRoleArn:
+    Type: String
+    Description: ApplicationTaskRoleArn from the application task role stack.
+  ServiceBasePostcode:
+    Type: String
+    NoEcho: true
+  GoogleLeadsWebhookUrl:
+    Type: String
+    NoEcho: true
+    Description: Deployed Google Apps Script web app URL.
+  GoogleLeadsWebhookSecret:
+    Type: String
+    NoEcho: true
+    Description: Shared secret configured in Apps Script properties.
+  AllowedOrigins:
+    Type: String
+    Default: '["https://mathsjumpandgo.co.uk"]'
+  NightRateStartHour:
+    Type: Number
+    Default: 22
+    MinValue: 0
+    MaxValue: 23
+  NightRateEndHour:
+    Type: Number
+    Default: 7
+    MinValue: 0
+    MaxValue: 23
+
 Resources:
 
   BackendTaskDefinition:
@@ -19,10 +51,27 @@ Resources:
 
       ExecutionRoleArn: "arn:aws:iam::653058737468:role/maths-jump-and-go-ecs-execution-role"
 
+      TaskRoleArn: !Ref ApplicationTaskRoleArn
+
       ContainerDefinitions:
         - Name: backend
 
-          Image: 653058737468.dkr.ecr.eu-west-2.amazonaws.com/maths-jump-and-go/development/backend:dev
+          Image: !Ref BackendImageUri
+          Environment:
+            - Name: SERVICE_BASE_POSTCODE
+              Value: !Ref ServiceBasePostcode
+            - Name: GOOGLE_LEADS_WEBHOOK_URL
+              Value: !Ref GoogleLeadsWebhookUrl
+            - Name: GOOGLE_LEADS_WEBHOOK_SECRET
+              Value: !Ref GoogleLeadsWebhookSecret
+            - Name: ALLOWED_ORIGINS
+              Value: !Ref AllowedOrigins
+            - Name: AWS_REGION
+              Value: !Ref AWS::Region
+            - Name: NIGHT_RATE_START_HOUR
+              Value: !Ref NightRateStartHour
+            - Name: NIGHT_RATE_END_HOUR
+              Value: !Ref NightRateEndHour
 
           Essential: true
 

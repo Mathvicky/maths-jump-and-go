@@ -4,6 +4,7 @@ import httpx
 import pytest
 
 from app.config import Settings
+from app.postcodes import PostcodeLocation
 from app.quote_service import estimate_car_quote_from_postcode
 import app.quote_service as quote_service
 
@@ -18,10 +19,10 @@ async def test_estimate_car_quote_from_postcode(
 ) -> None:
     postcode_calls: list[str] = []
 
-    async def fake_lookup_postcode(
+    async def fake_lookup_postcode_location(
         postcode: str,
         client: httpx.AsyncClient,
-    ) -> tuple[float, float]:
+    ) -> PostcodeLocation:
         postcode_calls.append(postcode)
 
         coordinates = {
@@ -29,7 +30,8 @@ async def test_estimate_car_quote_from_postcode(
             "HP11 2AA": (51.6000, -0.7000),
         }
 
-        return coordinates[postcode]
+        latitude, longitude = coordinates[postcode]
+        return PostcodeLocation(postcode, latitude, longitude, "High Wycombe")
 
     def fake_calculate_driving_miles(
         client: Any,
@@ -43,8 +45,8 @@ async def test_estimate_car_quote_from_postcode(
 
     monkeypatch.setattr(
         quote_service,
-        "lookup_postcode",
-        fake_lookup_postcode,
+        "lookup_postcode_location",
+        fake_lookup_postcode_location,
     )
 
     monkeypatch.setattr(
@@ -61,10 +63,10 @@ async def test_estimate_car_quote_from_postcode(
     )
 
     async with httpx.AsyncClient() as postcode_client:
-        estimated_price, driving_miles = (
+        estimated_price, driving_miles, postcode, location, night_rate, out_of_area = (
             await estimate_car_quote_from_postcode(
                 customer_postcode="HP11 2AA",
-                evening_or_weekend=False,
+                callout_time="12:00",
                 settings=settings,
                 postcode_client=postcode_client,
                 routes_client=FakeRoutesClient(),
@@ -77,17 +79,21 @@ async def test_estimate_car_quote_from_postcode(
     ]
     assert driving_miles == 4.0
     assert estimated_price == 45
+    assert postcode == "HP11 2AA"
+    assert location == "High Wycombe"
+    assert night_rate is False
+    assert out_of_area is False
 
 
 @pytest.mark.asyncio
-async def test_orchestration_applies_evening_supplement(
+async def test_orchestration_applies_night_multiplier(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    async def fake_lookup_postcode(
+    async def fake_lookup_postcode_location(
         postcode: str,
         client: httpx.AsyncClient,
-    ) -> tuple[float, float]:
-        return (51.6287, -0.7482)
+    ) -> PostcodeLocation:
+        return PostcodeLocation(postcode, 51.6287, -0.7482, "High Wycombe")
 
     def fake_calculate_driving_miles(
         client: Any,
@@ -98,8 +104,8 @@ async def test_orchestration_applies_evening_supplement(
 
     monkeypatch.setattr(
         quote_service,
-        "lookup_postcode",
-        fake_lookup_postcode,
+        "lookup_postcode_location",
+        fake_lookup_postcode_location,
     )
 
     monkeypatch.setattr(
@@ -116,10 +122,10 @@ async def test_orchestration_applies_evening_supplement(
     )
 
     async with httpx.AsyncClient() as postcode_client:
-        estimated_price, driving_miles = (
+        estimated_price, driving_miles, _postcode, _location, night_rate, out_of_area = (
             await estimate_car_quote_from_postcode(
                 customer_postcode="HP11 2AA",
-                evening_or_weekend=True,
+                callout_time="23:00",
                 settings=settings,
                 postcode_client=postcode_client,
                 routes_client=FakeRoutesClient(),
@@ -127,18 +133,20 @@ async def test_orchestration_applies_evening_supplement(
         )
 
     assert driving_miles == 4.0
-    assert estimated_price == 55
+    assert estimated_price == 90
+    assert night_rate is True
+    assert out_of_area is False
 
 
 @pytest.mark.asyncio
-async def test_orchestration_returns_manual_quote_over_15_miles(
+async def test_orchestration_prices_over_15_miles(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    async def fake_lookup_postcode(
+    async def fake_lookup_postcode_location(
         postcode: str,
         client: httpx.AsyncClient,
-    ) -> tuple[float, float]:
-        return (51.6287, -0.7482)
+    ) -> PostcodeLocation:
+        return PostcodeLocation(postcode, 51.6287, -0.7482, "High Wycombe")
 
     def fake_calculate_driving_miles(
         client: Any,
@@ -149,8 +157,8 @@ async def test_orchestration_returns_manual_quote_over_15_miles(
 
     monkeypatch.setattr(
         quote_service,
-        "lookup_postcode",
-        fake_lookup_postcode,
+        "lookup_postcode_location",
+        fake_lookup_postcode_location,
     )
 
     monkeypatch.setattr(
@@ -167,10 +175,10 @@ async def test_orchestration_returns_manual_quote_over_15_miles(
     )
 
     async with httpx.AsyncClient() as postcode_client:
-        estimated_price, driving_miles = (
+        estimated_price, driving_miles, _postcode, _location, night_rate, out_of_area = (
             await estimate_car_quote_from_postcode(
                 customer_postcode="HP11 2AA",
-                evening_or_weekend=False,
+                callout_time="12:00",
                 settings=settings,
                 postcode_client=postcode_client,
                 routes_client=FakeRoutesClient(),
@@ -178,4 +186,6 @@ async def test_orchestration_returns_manual_quote_over_15_miles(
         )
 
     assert driving_miles == 15.1
-    assert estimated_price is None
+    assert estimated_price == 120
+    assert night_rate is False
+    assert out_of_area is True

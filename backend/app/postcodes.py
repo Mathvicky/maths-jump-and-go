@@ -1,4 +1,5 @@
 from urllib.parse import quote
+from dataclasses import dataclass
 
 import httpx
 
@@ -10,6 +11,14 @@ class PostcodeNotFoundError(ValueError):
     """Raised when a UK postcode cannot be found."""
 
 
+@dataclass(frozen=True)
+class PostcodeLocation:
+    postcode: str
+    latitude: float
+    longitude: float
+    place_name: str
+
+
 def normalise_postcode(postcode: str) -> str:
     return " ".join(postcode.strip().upper().split())
 
@@ -18,6 +27,14 @@ async def lookup_postcode(
     postcode: str,
     client: httpx.AsyncClient,
 ) -> tuple[float, float]:
+    location = await lookup_postcode_location(postcode, client)
+    return location.latitude, location.longitude
+
+
+async def lookup_postcode_location(
+    postcode: str,
+    client: httpx.AsyncClient,
+) -> PostcodeLocation:
     normalised = normalise_postcode(postcode)
 
     if not normalised:
@@ -38,4 +55,18 @@ async def lookup_postcode(
     payload = response.json()
     result = payload["result"]
 
-    return result["latitude"], result["longitude"]
+    normalised_result = normalise_postcode(result.get("postcode") or normalised)
+    place_parts = []
+    parish = result.get("parish")
+    if parish and "unparished" not in parish.lower():
+        place_parts.append(parish)
+    for value in (result.get("admin_district"), result.get("region")):
+        if value and value not in place_parts:
+            place_parts.append(value)
+
+    return PostcodeLocation(
+        postcode=normalised_result,
+        latitude=result["latitude"],
+        longitude=result["longitude"],
+        place_name=", ".join(place_parts) or normalised_result,
+    )

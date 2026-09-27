@@ -1,14 +1,19 @@
 services:
   backend:
     build:
-      context: ./backend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: backend/Dockerfile
     image: maths-jump-and-go-backend:dev
     container_name: maths-jump-and-go-backend
     environment:
-      SERVICE_BASE_POSTCODE: ${SERVICE_BASE_POSTCODE:-HP00 0AA}
+      SERVICE_BASE_POSTCODE: ${SERVICE_BASE_POSTCODE:-HP12 3GH}
+      NIGHT_RATE_START_HOUR: ${NIGHT_RATE_START_HOUR:-22}
+      NIGHT_RATE_END_HOUR: ${NIGHT_RATE_END_HOUR:-7}
       AWS_REGION: ${AWS_REGION:-eu-west-2}
       ENVIRONMENT: ${ENVIRONMENT:-development}
+      GOOGLE_LEADS_WEBHOOK_URL: ${GOOGLE_LEADS_WEBHOOK_URL:-}
+      GOOGLE_LEADS_WEBHOOK_SECRET: ${GOOGLE_LEADS_WEBHOOK_SECRET:-}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-[]}
     ports:
       - "127.0.0.1:8002:8001"
     restart: unless-stopped

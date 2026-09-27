@@ -3,7 +3,8 @@ from typing import Any, Annotated
 
 import boto3
 import httpx
-from fastapi import Depends
+from fastapi import Depends, HTTPException
+from botocore.exceptions import BotoCoreError, ClientError
 
 from app.config import Settings, get_settings
 
@@ -26,10 +27,10 @@ def get_routes_client(
 ) -> Any:
     """Provide an authenticated Amazon Location client."""
 
-    return boto3.client(
-        "geo-routes",
-        region_name=settings.aws_region,
-    )
+    try:
+        return boto3.client("geo-routes", region_name=settings.aws_region)
+    except (BotoCoreError, ClientError) as error:
+        raise HTTPException(503, "The quote service is temporarily unavailable.") from error
 
 
 PostcodeClientDependency = Annotated[

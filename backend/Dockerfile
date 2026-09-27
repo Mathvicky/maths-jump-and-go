@@ -13,12 +13,13 @@ RUN groupadd --system appgroup \
         --create-home \
         appuser
 
-COPY requirements.txt ./requirements.txt
+COPY backend/requirements.txt ./requirements.txt
 
 RUN python -m pip install --upgrade pip \
     && python -m pip install -r requirements.txt
 
-COPY --chown=appuser:appgroup app ./app
+COPY --chown=appuser:appgroup backend/app ./app
+COPY --chown=appuser:appgroup app ./frontend
 
 USER appuser
 

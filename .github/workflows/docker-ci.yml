@@ -21,4 +21,4 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Build backend image
-        run: docker build --tag maths-jump-and-go-backend:ci ./backend
+        run: docker build --file backend/Dockerfile --tag maths-jump-and-go-backend:ci .
