@@ -159,9 +159,13 @@ async def estimate_quote(
     elif request.vehicle_type == "van_large_24v":
         vehicle_adjustment = settings.vehicle_24v_adjustment
 
+    adjusted_price = price + vehicle_adjustment
+    if night_rate:
+        adjusted_price += vehicle_adjustment
+
     return await save_and_respond(
         "estimated",
-        price + vehicle_adjustment,
+        adjusted_price,
         "Estimated price only. Final price, vehicle compatibility and availability will be confirmed before dispatch.",
         estimate_label,
         rate_notice,

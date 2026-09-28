@@ -33,7 +33,7 @@ function setup(api = "https://api.example.test") {
     window: { SITE_CONFIG: {
       apiBaseUrl: api, phone: "01494 000000", whatsapp: "447700900000",
       serviceBasePostcode: "HP12 3GH",
-      vehicleAdjustments: { van12v: 10, vanLarge24v: 25 },
+      vehicleAdjustments: { van12v: 0, vanLarge24v: 30 },
     } },
     location: { origin: "https://example.test", hostname: "example.test" },
     document: {
@@ -93,7 +93,7 @@ test("browser estimates include 12V and 24V adjustments", async () => {
   twelveVolt.nodes["vehicle-type"].value = "van_12v";
   twelveVolt.nodes["callout-time"].value = "12:00";
   await twelveVolt.nodes["estimate-form"].handlers.submit({ preventDefault() {} });
-  assert.match(twelveVolt.nodes["estimated-price"].textContent, /£65/);
+  assert.match(twelveVolt.nodes["estimated-price"].textContent, /£55/);
   assert.equal(twelveVolt.nodes["estimate-vehicle"].textContent, "Vehicle: Van - 12V");
   assert.equal(twelveVolt.nodes["estimate-compatibility"].hidden, true);
 
@@ -102,9 +102,17 @@ test("browser estimates include 12V and 24V adjustments", async () => {
   twentyFourVolt.nodes["vehicle-type"].value = "van_large_24v";
   twentyFourVolt.nodes["callout-time"].value = "12:00";
   await twentyFourVolt.nodes["estimate-form"].handlers.submit({ preventDefault() {} });
-  assert.match(twentyFourVolt.nodes["estimated-price"].textContent, /£80/);
+  assert.match(twentyFourVolt.nodes["estimated-price"].textContent, /£85/);
   assert.equal(twentyFourVolt.nodes["estimate-vehicle"].textContent, "Vehicle: Van / Large Vehicle - 24V");
   assert.equal(twentyFourVolt.nodes["estimate-compatibility"].hidden, false);
+
+  const twentyFourVoltNight = setup("");
+  twentyFourVoltNight.nodes.postcode.value = "HP11 2AA";
+  twentyFourVoltNight.nodes["vehicle-type"].value = "van_large_24v";
+  twentyFourVoltNight.nodes["callout-time"].value = "23:00";
+  await twentyFourVoltNight.nodes["estimate-form"].handlers.submit({ preventDefault() {} });
+  assert.match(twentyFourVoltNight.nodes["estimated-price"].textContent, /£170/);
+  assert.equal(twentyFourVoltNight.nodes["estimate-rate-notice"].textContent, "Night call-out rate applies.");
 });
 
 test("Get Instant Estimate sends only the four calculation inputs", async () => {

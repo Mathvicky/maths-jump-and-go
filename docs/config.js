@@ -7,6 +7,6 @@ window.SITE_CONFIG = Object.freeze({
   whatsapp: "", // International digits, for example 447700900000.
   vehicleAdjustments: Object.freeze({
     van12v: 0,
-    vanLarge24v: 0,
+    vanLarge24v: 30,
   }),
 });

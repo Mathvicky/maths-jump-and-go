@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     night_rate_start_hour: int = Field(default=22, ge=0, le=23)
     night_rate_end_hour: int = Field(default=7, ge=0, le=23)
     vehicle_12v_adjustment: int = Field(default=0, ge=0)
-    vehicle_24v_adjustment: int = Field(default=0, ge=0)
+    vehicle_24v_adjustment: int = Field(default=30, ge=0)
 
     model_config = SettingsConfigDict(
         env_file=".env",

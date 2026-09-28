@@ -54,8 +54,8 @@ def override_settings() -> Settings:
         service_base_postcode="HP00 0AA",
         aws_region="eu-west-2",
         environment="testing",
-        vehicle_12v_adjustment=10,
-        vehicle_24v_adjustment=25,
+        vehicle_12v_adjustment=0,
+        vehicle_24v_adjustment=30,
         _env_file=None,
     )
 
@@ -219,36 +219,50 @@ def test_suv_uses_standard_distance_price() -> None:
     assert response.json()["estimated_price"] == 45
 
 
-def test_12v_van_receives_immediate_adjusted_estimate() -> None:
+@pytest.mark.parametrize(
+    ("callout_time", "expected_price"),
+    [("12:00", 45), ("23:00", 90)],
+)
+def test_12v_van_uses_normal_distance_price(
+    callout_time: str,
+    expected_price: int,
+) -> None:
     response = client.post(
         "/api/quotes/estimate",
         json={
             "vehicle_type": "van_12v",
             "postcode": "HP11 2AA",
-            "callout_time": "12:00",
+            "callout_time": callout_time,
             "estimate_id": ESTIMATE_ID,
         },
     )
 
     assert response.status_code == 200
     assert response.json()["pricing_status"] == "estimated"
-    assert response.json()["estimated_price"] == 55
+    assert response.json()["estimated_price"] == expected_price
 
 
-def test_24v_vehicle_receives_immediate_adjusted_estimate() -> None:
+@pytest.mark.parametrize(
+    ("callout_time", "expected_price"),
+    [("12:00", 75), ("23:00", 150)],
+)
+def test_24v_adjustment_is_applied_before_night_multiplier(
+    callout_time: str,
+    expected_price: int,
+) -> None:
     response = client.post(
         "/api/quotes/estimate",
         json={
             "vehicle_type": "van_large_24v",
             "postcode": "HP11 2AA",
-            "callout_time": "12:00",
+            "callout_time": callout_time,
             "estimate_id": ESTIMATE_ID,
         },
     )
 
     assert response.status_code == 200
     assert response.json()["pricing_status"] == "estimated"
-    assert response.json()["estimated_price"] == 70
+    assert response.json()["estimated_price"] == expected_price
 
 
 def test_specialist_vehicle_requires_manual_quote() -> None:

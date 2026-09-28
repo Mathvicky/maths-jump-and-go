@@ -39,7 +39,7 @@ Parameters:
     MinValue: 0
   Vehicle24vAdjustment:
     Type: Number
-    Default: 0
+    Default: 30
     MinValue: 0
 
 Resources:

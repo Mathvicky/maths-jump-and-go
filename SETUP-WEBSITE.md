@@ -20,8 +20,8 @@ Edit `app/config.js`:
 - `apiBaseUrl`: the backend HTTPS origin, or `same-origin` if FastAPI serves the site.
 - `phone`: the number used by the CALL NOW link.
 - `whatsapp`: the WhatsApp number in international digits, such as `447700900000`.
-- `vehicleAdjustments.van12v`: flat amount added to the calculated 12V van estimate.
-- `vehicleAdjustments.vanLarge24v`: flat amount added to the calculated 24V van/large-vehicle estimate.
+- `vehicleAdjustments.van12v`: adjustment added to the distance price before the night multiplier (default `0`).
+- `vehicleAdjustments.vanLarge24v`: adjustment added to the distance price before the night multiplier (default `30`).
 
 Never place the Google webhook secret, AWS credentials, private base postcode or business notification email in this public file.
 

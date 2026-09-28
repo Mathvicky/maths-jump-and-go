@@ -137,8 +137,8 @@ function calculateBrowserPrice(drivingMiles, nightRate, vehicleType) {
   else if (drivingMiles <= 10) price = 55;
   else if (drivingMiles <= 15) price = 60;
   else price = Math.ceil(drivingMiles / 15) * 60;
-  const distancePrice = nightRate ? price * 2 : price;
-  return distancePrice + (vehicleAdjustments[vehicleType] || 0);
+  const vehiclePrice = price + (vehicleAdjustments[vehicleType] || 0);
+  return nightRate ? vehiclePrice * 2 : vehiclePrice;
 }
 
 async function getJson(url) {
