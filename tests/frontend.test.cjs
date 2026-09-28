@@ -32,6 +32,7 @@ function setup(api = "https://api.example.test") {
   const context = {
     window: { SITE_CONFIG: {
       apiBaseUrl: api, phone: "01494 000000", whatsapp: "447700900000",
+      serviceBasePostcode: "HP12 3GH",
       vehicleAdjustments: { van12v: 10, vanLarge24v: 25 },
     } },
     location: { origin: "https://example.test", hostname: "example.test" },
@@ -72,6 +73,18 @@ test("unconfigured site calculates an estimate in the browser", async () => {
   assert.match(nodes["estimated-price"].textContent, /£55/);
   assert.equal(nodes["estimate-modal"].open, true);
   assert.match(nodes["estimate-data-note"].firstChild.textContent, /not saved/);
+});
+
+test("base postcode returns a zero-mile estimate without external calls", async () => {
+  const { nodes, calls } = setup("");
+  nodes.postcode.value = " hp12-3gh ";
+  nodes["vehicle-type"].value = "car";
+  nodes["callout-time"].value = "12:00";
+  await nodes["estimate-form"].handlers.submit({ preventDefault() {} });
+  assert.equal(calls.length, 0);
+  assert.equal(nodes["estimate-distance"].textContent, "Driving distance: 0.0 miles");
+  assert.match(nodes["estimated-price"].textContent, /£45/);
+  assert.equal(nodes["estimate-modal"].open, true);
 });
 
 test("browser estimates include 12V and 24V adjustments", async () => {

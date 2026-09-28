@@ -14,6 +14,57 @@ class FakeRoutesClient:
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("customer_postcode", "callout_time", "expected_price", "expected_night_rate"),
+    [
+        (" hp12 3gh ", "12:00", 45, False),
+        ("HP123GH", "23:00", 90, True),
+    ],
+)
+async def test_base_postcode_is_zero_miles_without_external_calls(
+    monkeypatch: pytest.MonkeyPatch,
+    customer_postcode: str,
+    callout_time: str,
+    expected_price: int,
+    expected_night_rate: bool,
+) -> None:
+    async def unexpected_postcode_lookup(*args: Any, **kwargs: Any) -> PostcodeLocation:
+        raise AssertionError("Postcode lookup must not be called for the base postcode")
+
+    def unexpected_route_call(*args: Any, **kwargs: Any) -> float:
+        raise AssertionError("Routing must not be called for the base postcode")
+
+    monkeypatch.setattr(quote_service, "lookup_postcode_location", unexpected_postcode_lookup)
+    monkeypatch.setattr(quote_service, "calculate_driving_miles", unexpected_route_call)
+    monkeypatch.setattr(quote_service, "calculate_osrm_driving_miles", unexpected_postcode_lookup)
+
+    settings = Settings(
+        service_base_postcode="HP12 3GH",
+        aws_region="eu-west-2",
+        environment="testing",
+        _env_file=None,
+    )
+
+    async with httpx.AsyncClient() as postcode_client:
+        estimated_price, driving_miles, postcode, location, night_rate, out_of_area = (
+            await estimate_car_quote_from_postcode(
+                customer_postcode=customer_postcode,
+                callout_time=callout_time,
+                settings=settings,
+                postcode_client=postcode_client,
+                routes_client=FakeRoutesClient(),
+            )
+        )
+
+    assert driving_miles == 0.0
+    assert estimated_price == expected_price
+    assert postcode == "HP12 3GH"
+    assert location == "HP12 3GH"
+    assert night_rate is expected_night_rate
+    assert out_of_area is False
+
+
+@pytest.mark.asyncio
 async def test_estimate_car_quote_from_postcode(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

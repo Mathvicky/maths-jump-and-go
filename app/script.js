@@ -21,6 +21,10 @@ const whatsappButton = document.querySelector("#whatsapp-now");
 const get = (id) => document.getElementById(id);
 const fallbackOrigin = Object.freeze({ latitude: 51.636098, longitude: -0.778677 });
 const metresPerMile = 1609.344;
+const normalisePostcodeForComparison = (postcode) => String(postcode || "")
+  .trim()
+  .toUpperCase()
+  .replace(/[^A-Z0-9]/g, "");
 const vehicleLabels = Object.freeze({
   car: "Car",
   suv_4x4: "SUV / 4x4",
@@ -150,6 +154,37 @@ async function getJson(url) {
 }
 
 async function estimateInBrowser(payload) {
+  const basePostcode = String(config.serviceBasePostcode || "").trim().toUpperCase();
+  const isBasePostcode = Boolean(basePostcode)
+    && normalisePostcodeForComparison(payload.postcode)
+      === normalisePostcodeForComparison(basePostcode);
+  if (isBasePostcode) {
+    const drivingMiles = 0;
+    const nightRate = isNightTime(payload.callout_time);
+    let pricingStatus = "estimated";
+    let estimatedPrice = calculateBrowserPrice(drivingMiles, nightRate, payload.vehicle_type);
+    let estimateLabel = "Your estimate is ready";
+    let message = "Estimated price only. Final price, vehicle compatibility and availability will be confirmed before dispatch.";
+    if (payload.vehicle_type === "other_specialist") {
+      pricingStatus = "manual_quote";
+      estimatedPrice = null;
+      estimateLabel = "Manual quote required";
+      message = "Other or specialist vehicles require a manual quote. Call or WhatsApp us now.";
+    }
+    return {
+      pricing_status: pricingStatus,
+      estimated_price: estimatedPrice,
+      currency: "GBP",
+      message,
+      estimate_label: estimateLabel,
+      rate_notice: pricingStatus === "estimated" && nightRate ? "Night call-out rate applies." : null,
+      estimate_id: payload.estimate_id,
+      postcode: basePostcode,
+      location: basePostcode,
+      driving_miles: drivingMiles,
+    };
+  }
+
   const postcodeData = await getJson(
     `https://api.postcodes.io/postcodes/${encodeURIComponent(payload.postcode)}`,
   );
