@@ -8,6 +8,8 @@ const estimateModal = document.querySelector("#estimate-modal");
 const estimatePrice = document.querySelector("#estimated-price");
 const estimateTitle = document.querySelector("#estimate-title");
 const estimateRateNotice = document.querySelector("#estimate-rate-notice");
+const estimateVehicle = document.querySelector("#estimate-vehicle");
+const estimateCompatibility = document.querySelector("#estimate-compatibility");
 const estimateMessage = document.querySelector("#estimate-message");
 const estimateLocation = document.querySelector("#estimate-location");
 const estimateDistance = document.querySelector("#estimate-distance");
@@ -19,6 +21,18 @@ const whatsappButton = document.querySelector("#whatsapp-now");
 const get = (id) => document.getElementById(id);
 const fallbackOrigin = Object.freeze({ latitude: 51.636098, longitude: -0.778677 });
 const metresPerMile = 1609.344;
+const vehicleLabels = Object.freeze({
+  car: "Car",
+  suv_4x4: "SUV / 4x4",
+  van_12v: "Van - 12V",
+  van_large_24v: "Van / Large Vehicle - 24V",
+  other_specialist: "Other / Specialist Vehicle",
+});
+const configuredAdjustments = config.vehicleAdjustments || {};
+const vehicleAdjustments = Object.freeze({
+  van_12v: Math.max(0, Number(configuredAdjustments.van12v) || 0),
+  van_large_24v: Math.max(0, Number(configuredAdjustments.vanLarge24v) || 0),
+});
 
 const revealItems = document.querySelectorAll
   ? Array.from(document.querySelectorAll("[data-reveal]"))
@@ -113,13 +127,14 @@ function isNightTime(calloutTime) {
   return time >= 22 * 60 || time < 7 * 60;
 }
 
-function calculateBrowserPrice(drivingMiles, nightRate) {
+function calculateBrowserPrice(drivingMiles, nightRate, vehicleType) {
   let price;
   if (drivingMiles <= 5) price = 45;
   else if (drivingMiles <= 10) price = 55;
   else if (drivingMiles <= 15) price = 60;
   else price = Math.ceil(drivingMiles / 15) * 60;
-  return nightRate ? price * 2 : price;
+  const distancePrice = nightRate ? price * 2 : price;
+  return distancePrice + (vehicleAdjustments[vehicleType] || 0);
 }
 
 async function getJson(url) {
@@ -161,19 +176,14 @@ async function estimateInBrowser(payload) {
       && values.indexOf(value) === index);
 
   let pricingStatus = "estimated";
-  let estimatedPrice = calculateBrowserPrice(drivingMiles, nightRate);
+  let estimatedPrice = calculateBrowserPrice(drivingMiles, nightRate, payload.vehicle_type);
   let estimateLabel = outOfArea ? "Out-of-area estimate" : "Your estimate is ready";
-  let message = "Estimated call-out price. Final price is confirmed before dispatch.";
-  if (payload.vehicle_type === "van") {
-    pricingStatus = "confirmation_required";
-    estimatedPrice = null;
-    estimateLabel = "Your estimate requires confirmation";
-    message = "Van price requires confirmation. Call or WhatsApp us now.";
-  } else if (payload.vehicle_type === "large") {
+  let message = "Estimated price only. Final price, vehicle compatibility and availability will be confirmed before dispatch.";
+  if (payload.vehicle_type === "other_specialist") {
     pricingStatus = "manual_quote";
     estimatedPrice = null;
     estimateLabel = "Manual quote required";
-    message = "Large vehicles require a manual quote. Call or WhatsApp us now.";
+    message = "Other or specialist vehicles require a manual quote. Call or WhatsApp us now.";
   }
 
   let rateNotice = null;
@@ -219,7 +229,8 @@ estimateForm.addEventListener("submit", async (event) => {
   formMessage.textContent = "Calculating your route securely…";
   if (estimateModal.open) estimateModal.close();
   try {
-    const result = await post("/api/quotes/estimate", quoteDetails());
+    const details = quoteDetails();
+    const result = await post("/api/quotes/estimate", details);
     estimatePrice.textContent = result.pricing_status === "estimated"
       ? new Intl.NumberFormat("en-GB", {
           style: "currency",
@@ -231,6 +242,8 @@ estimateForm.addEventListener("submit", async (event) => {
     estimateTitle.textContent = result.estimate_label;
     estimateRateNotice.textContent = result.rate_notice || "";
     estimateRateNotice.hidden = !result.rate_notice;
+    estimateVehicle.textContent = `Vehicle: ${vehicleLabels[details.vehicle_type] || details.vehicle_type}`;
+    estimateCompatibility.hidden = details.vehicle_type !== "van_large_24v";
     estimateLocation.textContent = result.location === result.postcode
       ? result.postcode
       : `${result.postcode} — ${result.location}`;

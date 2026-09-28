@@ -33,6 +33,14 @@ Parameters:
     Default: 7
     MinValue: 0
     MaxValue: 23
+  Vehicle12vAdjustment:
+    Type: Number
+    Default: 0
+    MinValue: 0
+  Vehicle24vAdjustment:
+    Type: Number
+    Default: 0
+    MinValue: 0
 
 Resources:
 
@@ -72,6 +80,10 @@ Resources:
               Value: !Ref NightRateStartHour
             - Name: NIGHT_RATE_END_HOUR
               Value: !Ref NightRateEndHour
+            - Name: VEHICLE_12V_ADJUSTMENT
+              Value: !Ref Vehicle12vAdjustment
+            - Name: VEHICLE_24V_ADJUSTMENT
+              Value: !Ref Vehicle24vAdjustment
 
           Essential: true
 
@@ -88,4 +100,3 @@ Resources:
 Outputs:
   TaskDefinitionArn:
     Value: !Ref BackendTaskDefinition
-

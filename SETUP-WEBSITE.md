@@ -20,6 +20,8 @@ Edit `app/config.js`:
 - `apiBaseUrl`: the backend HTTPS origin, or `same-origin` if FastAPI serves the site.
 - `phone`: the number used by the CALL NOW link.
 - `whatsapp`: the WhatsApp number in international digits, such as `447700900000`.
+- `vehicleAdjustments.van12v`: flat amount added to the calculated 12V van estimate.
+- `vehicleAdjustments.vanLarge24v`: flat amount added to the calculated 24V van/large-vehicle estimate.
 
 Never place the Google webhook secret, AWS credentials, private base postcode or business notification email in this public file.
 
@@ -47,6 +49,8 @@ Copy `backend/.env.example` to the ignored `backend/.env`, then set:
 - `SERVICE_BASE_POSTCODE`: the service origin postcode (`HP12 3GH`).
 - `NIGHT_RATE_START_HOUR`: start of the night-rate window in local 24-hour time (default `22`).
 - `NIGHT_RATE_END_HOUR`: end of the night-rate window in local 24-hour time (default `7`).
+- `VEHICLE_12V_ADJUSTMENT`: flat amount added to a 12V van estimate (default `0`).
+- `VEHICLE_24V_ADJUSTMENT`: flat amount added to a 24V van/large-vehicle estimate (default `0`).
 - `GOOGLE_LEADS_WEBHOOK_URL`: the deployed Apps Script `/exec` URL.
 - `GOOGLE_LEADS_WEBHOOK_SECRET`: the same secret as the script property.
 - `ALLOWED_ORIGINS`: the exact live website origins.

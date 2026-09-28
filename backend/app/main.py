@@ -131,23 +131,11 @@ async def estimate_quote(
             detail="The quote service is temporarily unavailable.",
         ) from error
 
-    if request.vehicle_type == "van":
-        return await save_and_respond(
-            "confirmation_required",
-            None,
-            "Van price requires confirmation. Call or WhatsApp us now.",
-            "Your estimate requires confirmation",
-            None,
-            driving_miles,
-            postcode,
-            location,
-        )
-
-    if request.vehicle_type == "large":
+    if request.vehicle_type == "other_specialist":
         return await save_and_respond(
             "manual_quote",
             None,
-            "Large vehicles require a manual quote. Call or WhatsApp us now.",
+            "Other or specialist vehicles require a manual quote. Call or WhatsApp us now.",
             "Manual quote required",
             None,
             driving_miles,
@@ -165,10 +153,16 @@ async def estimate_quote(
     else:
         rate_notice = None
 
+    vehicle_adjustment = 0
+    if request.vehicle_type == "van_12v":
+        vehicle_adjustment = settings.vehicle_12v_adjustment
+    elif request.vehicle_type == "van_large_24v":
+        vehicle_adjustment = settings.vehicle_24v_adjustment
+
     return await save_and_respond(
         "estimated",
-        price,
-        "Estimated call-out price. Final price is confirmed before dispatch.",
+        price + vehicle_adjustment,
+        "Estimated price only. Final price, vehicle compatibility and availability will be confirmed before dispatch.",
         estimate_label,
         rate_notice,
         driving_miles,

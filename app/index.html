@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Math's Jump & Go provides a 24/7 mobile battery jump-start service with UK-wide call-out estimates.">
   <title>Math's Jump & Go | Mobile Battery Jump-Start Service</title>
-  <link rel="stylesheet" href="styles.css?v=20260927-6">
+  <link rel="stylesheet" href="styles.css?v=20260928-1">
 </head>
 <body>
   <header class="site-header">
@@ -130,8 +130,10 @@
               <select id="vehicle-type" name="vehicleType" required>
                 <option value="">Choose vehicle</option>
                 <option value="car">Car</option>
-                <option value="van">Van</option>
-                <option value="large">Large vehicle</option>
+                <option value="suv_4x4">SUV / 4x4</option>
+                <option value="van_12v">Van - 12V</option>
+                <option value="van_large_24v">Van / Large Vehicle - 24V</option>
+                <option value="other_specialist">Other / Specialist Vehicle</option>
               </select>
             </div>
             <div class="form-field">
@@ -152,6 +154,8 @@
           <h3 id="estimate-title">Your estimate is ready</h3>
           <strong id="estimated-price"></strong>
           <p class="rate-notice" id="estimate-rate-notice" hidden></p>
+          <p class="estimate-vehicle" id="estimate-vehicle"></p>
+          <p class="compatibility-note" id="estimate-compatibility" hidden>24V vehicle - compatibility confirmation required.</p>
           <p class="estimate-location" id="estimate-location"></p>
           <p class="estimate-distance" id="estimate-distance"></p>
           <p id="estimate-message"></p>
@@ -176,7 +180,7 @@
     <p>&copy; 2026 Math's Jump & Go. All rights reserved.</p>
   </footer>
 
-  <script src="config.js?v=20260927-3"></script>
-  <script src="script.js?v=20260927-7"></script>
+  <script src="config.js?v=20260928-1"></script>
+  <script src="script.js?v=20260928-1"></script>
 </body>
 </html>

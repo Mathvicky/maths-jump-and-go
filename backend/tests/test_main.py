@@ -54,6 +54,8 @@ def override_settings() -> Settings:
         service_base_postcode="HP00 0AA",
         aws_region="eu-west-2",
         environment="testing",
+        vehicle_12v_adjustment=10,
+        vehicle_24v_adjustment=25,
         _env_file=None,
     )
 
@@ -201,11 +203,11 @@ def test_uk_distance_boundaries_and_distant_postcode(
     assert body["rate_notice"] == expected_notice
 
 
-def test_van_requires_confirmation() -> None:
+def test_suv_uses_standard_distance_price() -> None:
     response = client.post(
         "/api/quotes/estimate",
         json={
-            "vehicle_type": "van",
+            "vehicle_type": "suv_4x4",
             "postcode": "HP11 2AA",
             "callout_time": "12:00",
             "estimate_id": ESTIMATE_ID,
@@ -213,17 +215,47 @@ def test_van_requires_confirmation() -> None:
     )
 
     assert response.status_code == 200
-    assert response.json()["pricing_status"] == (
-        "confirmation_required"
-    )
-    assert response.json()["estimated_price"] is None
+    assert response.json()["pricing_status"] == "estimated"
+    assert response.json()["estimated_price"] == 45
 
 
-def test_large_vehicle_requires_manual_quote() -> None:
+def test_12v_van_receives_immediate_adjusted_estimate() -> None:
     response = client.post(
         "/api/quotes/estimate",
         json={
-            "vehicle_type": "large",
+            "vehicle_type": "van_12v",
+            "postcode": "HP11 2AA",
+            "callout_time": "12:00",
+            "estimate_id": ESTIMATE_ID,
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.json()["pricing_status"] == "estimated"
+    assert response.json()["estimated_price"] == 55
+
+
+def test_24v_vehicle_receives_immediate_adjusted_estimate() -> None:
+    response = client.post(
+        "/api/quotes/estimate",
+        json={
+            "vehicle_type": "van_large_24v",
+            "postcode": "HP11 2AA",
+            "callout_time": "12:00",
+            "estimate_id": ESTIMATE_ID,
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.json()["pricing_status"] == "estimated"
+    assert response.json()["estimated_price"] == 70
+
+
+def test_specialist_vehicle_requires_manual_quote() -> None:
+    response = client.post(
+        "/api/quotes/estimate",
+        json={
+            "vehicle_type": "other_specialist",
             "postcode": "HP11 2AA",
             "callout_time": "12:00",
             "estimate_id": ESTIMATE_ID,

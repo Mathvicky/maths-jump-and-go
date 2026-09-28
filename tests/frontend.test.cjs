@@ -7,7 +7,7 @@ function setup(api = "https://api.example.test") {
   const ids = [
     "estimate-form", "estimate-fields", "estimate-button", "estimate-modal",
     "estimated-price", "estimate-message", "estimate-location", "estimate-distance",
-    "estimate-title", "estimate-rate-notice", "estimate-reference", "estimate-close", "form-message", "call-now", "whatsapp-now",
+    "estimate-title", "estimate-rate-notice", "estimate-vehicle", "estimate-compatibility", "estimate-reference", "estimate-close", "form-message", "call-now", "whatsapp-now",
     "contact-setup-note", "estimate-data-note", "quote-data-use", "postcode", "vehicle-type", "callout-time",
   ];
   const nodes = Object.fromEntries(ids.map((id) => [id, {
@@ -30,7 +30,10 @@ function setup(api = "https://api.example.test") {
     driving_miles: 6.4, base_postcode: "HP12 3GH",
   };
   const context = {
-    window: { SITE_CONFIG: { apiBaseUrl: api, phone: "01494 000000", whatsapp: "447700900000" } },
+    window: { SITE_CONFIG: {
+      apiBaseUrl: api, phone: "01494 000000", whatsapp: "447700900000",
+      vehicleAdjustments: { van12v: 10, vanLarge24v: 25 },
+    } },
     location: { origin: "https://example.test", hostname: "example.test" },
     document: {
       querySelector: (selector) => nodes[selector.slice(1)],
@@ -71,6 +74,26 @@ test("unconfigured site calculates an estimate in the browser", async () => {
   assert.match(nodes["estimate-data-note"].firstChild.textContent, /not saved/);
 });
 
+test("browser estimates include 12V and 24V adjustments", async () => {
+  const twelveVolt = setup("");
+  twelveVolt.nodes.postcode.value = "HP11 2AA";
+  twelveVolt.nodes["vehicle-type"].value = "van_12v";
+  twelveVolt.nodes["callout-time"].value = "12:00";
+  await twelveVolt.nodes["estimate-form"].handlers.submit({ preventDefault() {} });
+  assert.match(twelveVolt.nodes["estimated-price"].textContent, /£65/);
+  assert.equal(twelveVolt.nodes["estimate-vehicle"].textContent, "Vehicle: Van - 12V");
+  assert.equal(twelveVolt.nodes["estimate-compatibility"].hidden, true);
+
+  const twentyFourVolt = setup("");
+  twentyFourVolt.nodes.postcode.value = "HP11 2AA";
+  twentyFourVolt.nodes["vehicle-type"].value = "van_large_24v";
+  twentyFourVolt.nodes["callout-time"].value = "12:00";
+  await twentyFourVolt.nodes["estimate-form"].handlers.submit({ preventDefault() {} });
+  assert.match(twentyFourVolt.nodes["estimated-price"].textContent, /£80/);
+  assert.equal(twentyFourVolt.nodes["estimate-vehicle"].textContent, "Vehicle: Van / Large Vehicle - 24V");
+  assert.equal(twentyFourVolt.nodes["estimate-compatibility"].hidden, false);
+});
+
 test("Get Instant Estimate sends only the four calculation inputs", async () => {
   const { nodes, calls } = setup();
   nodes.postcode.value = " hp11 2aa ";
@@ -85,6 +108,7 @@ test("Get Instant Estimate sends only the four calculation inputs", async () => 
   });
   assert.match(nodes["estimated-price"].textContent, /£55/);
   assert.equal(nodes["estimate-modal"].open, true);
+  assert.equal(nodes["estimate-vehicle"].textContent, "Vehicle: Car");
   assert.equal(nodes["estimate-location"].textContent, "HP11 2AA — High Wycombe, Buckinghamshire");
   assert.equal(nodes["estimate-distance"].textContent, "Driving distance: 6.4 miles");
   assert.match(nodes["call-now"].href, /^tel:/);

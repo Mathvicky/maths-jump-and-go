@@ -7,7 +7,13 @@ from pydantic import BaseModel, Field, ConfigDict
 
 class QuoteEstimateRequest(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
-    vehicle_type: Literal["car", "van", "large"]
+    vehicle_type: Literal[
+        "car",
+        "suv_4x4",
+        "van_12v",
+        "van_large_24v",
+        "other_specialist",
+    ]
     postcode: str = Field(
         min_length=5,
         max_length=8,
@@ -40,7 +46,13 @@ class LeadRecord(BaseModel):
     """The complete and deliberately minimal data sent to Google."""
 
     postcode: str
-    vehicle_type: Literal["car", "van", "large"]
+    vehicle_type: Literal[
+        "car",
+        "suv_4x4",
+        "van_12v",
+        "van_large_24v",
+        "other_specialist",
+    ]
     callout_time: str = Field(pattern=r"^(?:[01]\d|2[0-3]):[0-5]\d$")
     estimated_price: int | None
     timestamp: datetime
