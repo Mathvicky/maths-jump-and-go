@@ -132,6 +132,12 @@ a { color: inherit; text-decoration: none; }
   backdrop-filter: blur(10px);
 }
 .hero-actions { display: flex; flex-direction: column; gap: .75rem; margin-top: 1.75rem; }
+.hero-contact-actions { display: flex; flex-direction: column; gap: .75rem; margin-top: 1.75rem; }
+.hero-contact-actions + .hero-actions { margin-top: .75rem; }
+.hero-call-button { color: #05070a; background: var(--gold); }
+.hero-call-button:hover { background: #ffe23d; }
+.hero-whatsapp-button { color: white; background: var(--success); }
+.hero-whatsapp-button:hover { background: #169b4e; }
 .service-highlights { display: grid; gap: .5rem; margin: 1.75rem 0 0; padding: 0; color: #d2d2d7; list-style: none; font-size: .92rem; font-weight: 600; }
 .service-highlights li::before { content: "✓"; margin-right: .5rem; color: var(--gold); }
 .scroll-cue {
@@ -428,7 +434,7 @@ footer { padding: 2rem 5%; color: var(--muted); background: var(--canvas); text-
 @media (min-width: 620px) {
   .navigation-links { display: flex; gap: 1.4rem; font-size: .82rem; }
   .navigation-links a:hover { color: var(--gold); }
-  .hero-actions { flex-direction: row; }
+  .hero-actions, .hero-contact-actions { flex-direction: row; }
   .service-highlights { grid-template-columns: repeat(3, max-content); gap: 1.25rem; }
   main { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; padding-top: 1.25rem; }
   .quote-section, #privacy { grid-column: 1 / -1; }

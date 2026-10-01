@@ -7,7 +7,7 @@ function setup(api = "https://api.example.test") {
   const ids = [
     "estimate-form", "estimate-fields", "estimate-button", "estimate-modal",
     "estimated-price", "estimate-message", "estimate-location", "estimate-distance",
-    "estimate-title", "estimate-rate-notice", "estimate-vehicle", "estimate-compatibility", "estimate-reference", "estimate-close", "form-message", "call-now", "whatsapp-now",
+    "estimate-title", "estimate-rate-notice", "estimate-vehicle", "estimate-compatibility", "estimate-reference", "estimate-close", "form-message", "call-now", "whatsapp-now", "hero-call-now", "hero-whatsapp-now",
     "contact-setup-note", "estimate-data-note", "quote-data-use", "postcode", "vehicle-type", "callout-time",
   ];
   const nodes = Object.fromEntries(ids.map((id) => [id, {
@@ -136,6 +136,10 @@ test("Get Instant Estimate sends only the four calculation inputs", async () => 
   assert.equal(nodes["whatsapp-now"].href, "https://wa.me/447700900000");
   assert.equal(nodes["call-now"].hidden, false);
   assert.equal(nodes["whatsapp-now"].hidden, false);
+  assert.equal(nodes["hero-call-now"].href, "tel:01494000000");
+  assert.equal(nodes["hero-whatsapp-now"].href, "https://wa.me/447700900000");
+  assert.equal(nodes["hero-call-now"].hidden, false);
+  assert.equal(nodes["hero-whatsapp-now"].hidden, false);
 });
 
 test("rate labels are shown clearly", async () => {

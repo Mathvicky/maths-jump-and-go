@@ -18,6 +18,8 @@ const estimateClose = document.querySelector("#estimate-close");
 const formMessage = document.querySelector("#form-message");
 const callButton = document.querySelector("#call-now");
 const whatsappButton = document.querySelector("#whatsapp-now");
+const heroCallButton = document.querySelector("#hero-call-now");
+const heroWhatsappButton = document.querySelector("#hero-whatsapp-now");
 const get = (id) => document.getElementById(id);
 const fallbackOrigin = Object.freeze({ latitude: 51.636098, longitude: -0.778677 });
 const metresPerMile = 1609.344;
@@ -72,12 +74,18 @@ if (apiBase) {
 const phone = (config.phone || "").trim();
 const whatsapp = (config.whatsapp || "").replace(/\D/g, "");
 if (phone) {
-  callButton.href = `tel:${phone.replace(/[^+0-9]/g, "")}`;
-  callButton.hidden = false;
+  const phoneHref = `tel:${phone.replace(/[^+0-9]/g, "")}`;
+  for (const button of [callButton, heroCallButton]) {
+    button.href = phoneHref;
+    button.hidden = false;
+  }
 }
 if (whatsapp) {
-  whatsappButton.href = `https://wa.me/${whatsapp}`;
-  whatsappButton.hidden = false;
+  const whatsappHref = `https://wa.me/${whatsapp}`;
+  for (const button of [whatsappButton, heroWhatsappButton]) {
+    button.href = whatsappHref;
+    button.hidden = false;
+  }
 }
 get("contact-setup-note").hidden = Boolean(phone || whatsapp);
 
