@@ -132,8 +132,10 @@ test("Get Instant Estimate sends only the four calculation inputs", async () => 
   assert.equal(nodes["estimate-vehicle"].textContent, "Vehicle: Car");
   assert.equal(nodes["estimate-location"].textContent, "HP11 2AA — High Wycombe, Buckinghamshire");
   assert.equal(nodes["estimate-distance"].textContent, "Driving distance: 6.4 miles");
-  assert.match(nodes["call-now"].href, /^tel:/);
-  assert.match(nodes["whatsapp-now"].href, /^https:\/\/wa\.me\//);
+  assert.equal(nodes["call-now"].href, "tel:01494000000");
+  assert.equal(nodes["whatsapp-now"].href, "https://wa.me/447700900000");
+  assert.equal(nodes["call-now"].hidden, false);
+  assert.equal(nodes["whatsapp-now"].hidden, false);
 });
 
 test("rate labels are shown clearly", async () => {
