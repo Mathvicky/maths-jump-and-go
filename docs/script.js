@@ -92,7 +92,7 @@ get("contact-setup-note").hidden = Boolean(phone || whatsapp);
 estimateFields.disabled = false;
 if (!apiBase) {
   get("estimate-data-note").firstChild.textContent = "Your details are processed only to calculate this estimate and are not saved by the website. ";
-  get("quote-data-use").textContent = "When you select Get Instant Estimate, your postcode, vehicle type and call-out time are processed only to calculate and display the price. Until the business notification service is connected, the website does not save or email these details.";
+  get("quote-data-use").textContent = "When you select Get Instant Estimate, your postcode, vehicle type and call-out time are processed only to calculate and display the price. The website does not save or email these details. To request a call-out, contact us by phone or WhatsApp.";
 }
 
 let estimateId = crypto.randomUUID();
